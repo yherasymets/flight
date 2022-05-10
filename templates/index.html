@@ -15,14 +15,14 @@
           <h2 class="card-title">{{ .Title }}</h2>
       </div>
         <div style="position:absolute; padding-top: 0px;"><div class="d-flex justify-content-end">
-          <a style=" border-color: #ffffff;" href="/delete_article/{{ .Id }}" class="btn">
-            <i style="color:#ffffff;" class="fa fa-times" aria-hidden="true"></i> 
-          </a> 
+          <form action="/articles/{{ .Id }}/delete" method="post">
+              <button class="btn form-control"  style="border-color: #ffffff;"><i style="color:#ffffff;" class="fa fa-times" aria-hidden="true"></i></button>
+          </form>
         </div>
       </div>
     </div>
       <p class="card-text">{{ .Anons }}</p>
-      <a href="/post/{{ .Id }}" class="btn btn-danger">Читать далее!</a>
+      <a href="/articles/{{ .Id }}" class="btn btn-danger">Читать далее!</a>
     </div>
     </div>
   </div>

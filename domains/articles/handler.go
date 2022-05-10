@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"text/template"
 
+	"example.com/module/models"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 )
@@ -19,15 +20,15 @@ type Handler interface {
 	Delete(w http.ResponseWriter, r *http.Request)
 }
 
-type service struct {
+type handlerService struct {
 	*sql.DB
 }
 
-func NewHandler(db *sql.DB) *service {
-	return &service{db}
+func NewHandler(db *sql.DB) *handlerService {
+	return &handlerService{db}
 }
 
-func (s *service) List(w http.ResponseWriter, r *http.Request) {
+func (s *handlerService) List(w http.ResponseWriter, r *http.Request) {
 
 	t, err := template.ParseFiles("templates/index.html", "templates/header.html", "templates/footer.html")
 
@@ -35,17 +36,16 @@ func (s *service) List(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, err.Error())
 	}
 
-	res, err := s.Query("SELECT * FROM `articles`")
-
+	selectArticle, err := s.Query("SELECT * FROM `articles`")
 	if err != nil {
 		panic(err)
 	}
 
-	posts := []Article{}
+	posts := []models.Article{}
 
-	for res.Next() {
-		var post Article
-		err = res.Scan(&post.Id, &post.Title, &post.Anons, &post.FullText)
+	for selectArticle.Next() {
+		var post models.Article
+		err = selectArticle.Scan(&post.Id, &post.Title, &post.Anons, &post.FullText, &post.UserId)
 
 		posts = append(posts, post)
 
@@ -54,32 +54,34 @@ func (s *service) List(w http.ResponseWriter, r *http.Request) {
 	t.ExecuteTemplate(w, "index", posts)
 }
 
-func (s *service) New(w http.ResponseWriter, r *http.Request) {
+func (s *handlerService) New(w http.ResponseWriter, r *http.Request) {
 
-	t, err := template.ParseFiles("templates/create.html", "templates/header.html", "templates/footer.html")
+	t, err := template.ParseFiles("templates/new.html", "templates/header.html", "templates/footer.html")
 
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
 	}
 
-	t.ExecuteTemplate(w, "create", nil)
+	t.ExecuteTemplate(w, "new", nil)
 }
 
-func (s *service) Features(w http.ResponseWriter, r *http.Request) {
+func (s *handlerService) Features(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Other features")
 
 }
 
-func (s *service) Create(w http.ResponseWriter, r *http.Request) {
+func (s *handlerService) Create(w http.ResponseWriter, r *http.Request) {
 	title := r.FormValue("title")
 	anons := r.FormValue("anons")
 	full_text := r.FormValue("full_text")
 
 	if title == "" || anons == "" || full_text == "" {
 		fmt.Fprintf(w, "Не все данные заполнены")
+
 	} else {
 
-		insert, err := s.Query(fmt.Sprintf("INSERT INTO `articles` (`title`, `anons`, `full_text`) VALUES ('%s', '%s', '%s')", title, anons, full_text))
+		insert, err := s.Query(fmt.Sprintf("INSERT INTO `articles` (`title`, `anons`, `full_text`, `user_id`) VALUES ('%s', '%s', '%s', '%d')",
+			title, anons, full_text, 2))
 
 		if err != nil {
 			panic(err)
@@ -87,11 +89,11 @@ func (s *service) Create(w http.ResponseWriter, r *http.Request) {
 
 		defer insert.Close()
 
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/articles/", http.StatusSeeOther)
 	}
 }
 
-func (s *service) Show(w http.ResponseWriter, r *http.Request) {
+func (s *handlerService) Show(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	t, err := template.ParseFiles("templates/show.html", "templates/header.html", "templates/footer.html")
@@ -106,11 +108,11 @@ func (s *service) Show(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	showPost := Article{}
+	showPost := models.Article{}
 
 	for res.Next() {
-		var post Article
-		err = res.Scan(&post.Id, &post.Title, &post.Anons, &post.FullText)
+		var post models.Article
+		err = res.Scan(&post.Id, &post.Title, &post.Anons, &post.FullText, &post.UserId)
 
 		showPost = post
 
@@ -120,7 +122,7 @@ func (s *service) Show(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (s *service) Delete(w http.ResponseWriter, r *http.Request) {
+func (s *handlerService) Delete(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 
@@ -132,6 +134,6 @@ func (s *service) Delete(w http.ResponseWriter, r *http.Request) {
 
 	defer res.Close()
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/articles/", http.StatusSeeOther)
 
 }

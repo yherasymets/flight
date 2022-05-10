@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 
-	"example.com/module/articles"
+	"example.com/module/domains/articles"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 )
@@ -18,13 +18,15 @@ func main() {
 
 	articleHandler := articles.NewHandler(db)
 
-	articleResurce := mux.NewRouter()
+	r := mux.NewRouter()
+
+	articleResurce := r.PathPrefix("/articles").Subrouter()
 
 	articleResurce.HandleFunc("/", articleHandler.List).Methods("GET")
-	articleResurce.HandleFunc("/post/{id:[0-9]+}", articleHandler.Show).Methods("GET")
-	articleResurce.HandleFunc("/create", articleHandler.New).Methods("GET")
-	articleResurce.HandleFunc("/save_article", articleHandler.Create).Methods("POST")
-	articleResurce.HandleFunc("/delete_article/{id:[0-9]+}", articleHandler.Delete).Methods("GET")
+	articleResurce.HandleFunc("/{id:[0-9]+}", articleHandler.Show).Methods("GET")
+	articleResurce.HandleFunc("/new", articleHandler.New).Methods("GET")
+	articleResurce.HandleFunc("/create", articleHandler.Create).Methods("POST")
+	articleResurce.HandleFunc("/{id:[0-9]+}/delete", articleHandler.Delete).Methods("POST")
 
 	http.Handle("/", articleResurce)
 
