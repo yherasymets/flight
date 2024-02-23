@@ -8,20 +8,18 @@ import (
 )
 
 func (a *app) craeteFlight(w http.ResponseWriter, r *http.Request) {
-	fligt := new(models.Flight)
-	if err := a.readJSON(w, r, &fligt); err != nil {
+	flight := new(models.Flight)
+	if err := a.readJSON(w, r, &flight); err != nil {
 		a.badRequestResponse(w, r, err)
 		return
 	}
-	if err := a.repo.Create(fligt); err != nil {
+	if err := a.repo.Create(flight); err != nil {
 		a.serverErrorResp(w, r, err)
 		return
 	}
 	headers := make(http.Header)
-	headers.Set("Location", fmt.Sprintf("/v1/flight/%d", fligt.ID))
-	// Write a JSON response with a 201 Created status code, the movie data in the
-	// response body, and the Location header.
-	err := a.sendJSON(w, http.StatusCreated, wrapJson{"flight": fligt}, headers)
+	headers.Set("Location", fmt.Sprintf("/v1/flight/%d", flight.ID))
+	err := a.sendJSON(w, http.StatusCreated, wrapJson{"flight": flight}, headers)
 	if err != nil {
 		a.serverErrorResp(w, r, err)
 	}
@@ -59,22 +57,15 @@ func (a *app) updateFlight(w http.ResponseWriter, r *http.Request) {
 		a.serverErrorResp(w, r, err)
 		return
 	}
-
 	fligt.CreatedAt = prevFlight.CreatedAt
 	fligt.ID = prevFlight.ID
-
 	if err := a.repo.Update(id, fligt); err != nil {
 		a.serverErrorResp(w, r, err)
 	}
-
-	headers := make(http.Header)
-	headers.Set("Location", fmt.Sprintf("/v1/flight/%d", fligt.ID))
-
 	err = a.sendJSON(w, http.StatusOK, wrapJson{"data": fligt}, nil)
 	if err != nil {
 		a.serverErrorResp(w, r, err)
 	}
-
 }
 
 func (a *app) deleteFlihgt(w http.ResponseWriter, r *http.Request) {
