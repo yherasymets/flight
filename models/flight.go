@@ -11,8 +11,8 @@ type Flight struct {
 	AirlineName   string     `json:"airlineName"`
 	FligtNumber   string     `json:"fligtNumber"`
 	DayOfWeek     []int      `json:"dayOfWeek,omitempty"`
-	DepartureTime time.Time  `json:"departureTime"`
-	ArrivalTime   time.Time  `json:"arrivalTime"`
+	DepartureTime CustomTime `json:"departureTime"`
+	ArrivalTime   CustomTime `json:"arrivalTime"`
 	AircraftType  []string   `json:"aircraftType"`
 	FlightTime    FlightTime `json:"flightTime,omitempty"`
 	CreatedAt     time.Time  `json:"createdAt"`

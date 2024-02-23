@@ -2,6 +2,7 @@ package repo
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/lib/pq"
@@ -24,27 +25,31 @@ type Service interface {
 }
 
 func (r *repo) Create(flight *models.Flight) error {
-	var id int
 	query := `INSERT INTO flight (from_airport, to_airport, airline_name, fligt_number, day_of_week, departure_time, 
 							      arrival_time, aircraft_type, flight_time, created_at)
 		      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 			  RETURNING id`
-	if err := r.db.QueryRow(query,
+	// TODO write helper func
+	departureTime, err := time.Parse(time.TimeOnly, flight.DepartureTime.String())
+	if err != nil {
+		fmt.Println("Error parsing departure time:", err)
+	}
+	arrivalTime, err := time.Parse(time.TimeOnly, flight.ArrivalTime.String())
+	if err != nil {
+		fmt.Println("Error parsing arrival time:", err)
+	}
+	flight.CreatedAt = time.Now()
+	return r.db.QueryRow(query,
 		flight.FromAirport,
 		flight.ToAirport,
 		flight.AirlineName,
 		flight.FligtNumber,
 		pq.Array(flight.DayOfWeek),
-		flight.DepartureTime,
-		flight.ArrivalTime,
+		departureTime,
+		arrivalTime,
 		pq.Array(flight.AircraftType),
 		flight.FlightTime,
-		time.Now()).
-		Scan(&id); err != nil {
-		return err
-	}
-	flight.ID = id
-	return nil
+		flight.CreatedAt).Scan(&flight.ID)
 }
 
 func (r *repo) Get(id int64) (*models.Flight, error) {
