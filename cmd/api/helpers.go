@@ -6,21 +6,17 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
 type wrapJson map[string]interface{}
 
-func (a *app) getIDparamFromQuery(r *http.Request) (int64, error) {
+func (a *app) getIDfromQuery(r *http.Request) uuid.UUID {
 	params := mux.Vars(r)
-	id, err := strconv.ParseInt(params["id"], 10, 64)
-	if err != nil || id < 1 {
-		return 0, errors.New("invalid id parameter")
-	}
-	return id, nil
+	return uuid.MustParse(params["id"])
 }
 
 func (a *app) sendJSON(w http.ResponseWriter, statusCode int, data wrapJson, headers http.Header) error {

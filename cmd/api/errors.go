@@ -38,8 +38,6 @@ func (a *app) badRequestResponse(w http.ResponseWriter, r *http.Request, err err
 	a.errResp(w, r, http.StatusBadRequest, err.Error())
 }
 
-// Note that the errors parameter here has the type map[string]string, which is exactly
-// the same as the errors map contained in our Validator type.
 func (a *app) failedValidationResponse(w http.ResponseWriter, r *http.Request, errors map[string]string) {
 	a.errResp(w, r, http.StatusUnprocessableEntity, errors)
 }
