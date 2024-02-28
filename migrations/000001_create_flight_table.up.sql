@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS flight (
-    id serial PRIMARY KEY,
+    id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
     from_airport varchar(3) NOT NULL,
     to_airport varchar(3) NOT NULL,
     airline_name varchar(35) NOT NULL,
@@ -9,5 +9,6 @@ CREATE TABLE IF NOT EXISTS flight (
     arrival_time timestamp,
     aircraft_type text[] NOT NULL,
     flight_time text NOT NULL,
-    created_at timestamp(0) with time zone NOT NULL DEFAULT NOW()
+    created_at timestamp(0) with time zone NOT NULL DEFAULT NOW(),
+    updated_at timestamp(0) with time zone DEFAULT NOW()
 );

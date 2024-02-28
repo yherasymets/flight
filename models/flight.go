@@ -2,10 +2,12 @@ package models
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Flight struct {
-	ID            int        `json:"id"`
+	ID            uuid.UUID  `json:"id"`
 	FromAirport   string     `json:"from"`
 	ToAirport     string     `json:"to"`
 	AirlineName   string     `json:"airlineName"`
@@ -16,4 +18,5 @@ type Flight struct {
 	AircraftType  []string   `json:"aircraftType"`
 	FlightTime    FlightTime `json:"flightTime,omitempty"`
 	CreatedAt     time.Time  `json:"createdAt"`
+	UpdatedAt     time.Time  `json:"updatedAt"`
 }
